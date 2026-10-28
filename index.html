@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TELOS — Connected Productivity</title>
+  <meta name="description" content="Connected task management, track-based planning, social productivity, and AI assistance.">
+  <meta name="theme-color" content="#0B0F19">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TELOS">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon.svg">
+
+  <!-- Tailwind CSS & FontAwesome CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: #26334D; border-radius: 4px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @supports (-webkit-touch-callout: none) {
+      .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+      .safe-top { padding-top: max(0.5rem, env(safe-area-inset-top)); }
+    }
+  </style>
+</head>
+<body class="bg-[#070A11] text-[#F8FAFC] min-h-screen sm:min-h-[100dvh] flex items-center justify-center p-0 sm:p-4 antialiased font-sans select-none overflow-hidden">
+
+  <!-- Mobile Phone Device Container: Fullscreen on mobile, Sleek Mockup on Desktop -->
+  <div class="relative w-full sm:max-w-[430px] h-[100dvh] sm:h-[880px] bg-[#0B0F19] rounded-none sm:rounded-[44px] border-0 sm:border-[6px] border-[#1E293B] shadow-2xl flex flex-col overflow-hidden">
+    
+    <!-- Phone Status Bar Mockup (Visible on desktop; blends on phone) -->
+    <div class="hidden sm:flex pt-3 pb-1 px-6 justify-between items-center text-xs text-[#94A3B8] z-50">
+      <span class="font-bold text-white tracking-wider">9:41</span>
+      <div class="w-20 h-4 bg-black rounded-full flex items-center justify-center space-x-1">
+        <div class="w-2 h-2 rounded-full bg-[#1E293B]"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-[#06B6D4]"></div>
+      </div>
+      <div class="flex items-center space-x-1.5">
+        <i class="fas fa-signal text-[10px]"></i>
+        <i class="fas fa-wifi text-[10px]"></i>
+        <i class="fas fa-battery-full text-xs text-[#10B981]"></i>
+      </div>
+    </div>
+
+    <!-- PERSISTENT TOP NAVIGATION BAR (Spec 4.2) -->
+    <header class="px-4 py-3 bg-[#0B0F19]/95 backdrop-blur-md border-b border-[#1E293B] flex items-center justify-between z-40">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="fas fa-circle-nodes text-white text-sm"></i>
+        </div>
+        <span class="font-black text-lg tracking-widest bg-gradient-to-r from-white to-[#CBD5E1] bg-clip-text text-transparent">TELOS</span>
+      </div>
+
+      <!-- Top 4 Action Icons -->
+      <div class="flex items-center space-x-1">
+        <button onclick="openModal('searchModal')" title="Global Search" class="w-8 h-8 rounded-lg hover:bg-[#1E293B] text-[#94A3B8] hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-search text-sm"></i>
+        </button>
+        <button onclick="openModal('aiModal')" title="AI Chatbot Assistant" class="w-8 h-8 rounded-lg hover:bg-[#1E293B] text-[#06B6D4] flex items-center justify-center transition">
+          <i class="fas fa-robot text-sm"></i>
+        </button>
+        <button onclick="openModal('rewardsModal')" title="Points Chest" class="w-8 h-8 rounded-lg hover:bg-[#1E293B] text-[#F59E0B] flex items-center justify-center transition relative">
+          <i class="fas fa-award text-sm"></i>
+          <span id="pointsBadge" class="absolute -top-1 -right-1 bg-[#F59E0B] text-black text-[9px] font-black px-1 rounded-full">160</span>
+        </button>
+        <button onclick="openModal('settingsModal')" title="Settings" class="w-8 h-8 rounded-lg hover:bg-[#1E293B] text-[#94A3B8] hover:text-white flex items-center justify-center transition">
+          <i class="fas fa-gear text-sm"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN SCROLLABLE APP BODY -->
+    <main id="appBody" class="flex-1 overflow-y-auto no-scrollbar pb-24">
+      
+      <!-- SCREEN 1: HOME PAGE (Default, Spec 5) -->
+      <section id="screen-home" class="p-4 space-y-5">
+        <!-- Today Header -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-black tracking-tight" id="headerDay">Today</h1>
+            <p class="text-xs text-[#94A3B8] font-medium" id="headerDate">Thursday, October 29, 2026</p>
+          </div>
+          <button onclick="openCreateTaskModal()" class="px-3.5 py-2 bg-[#6366F1] hover:bg-indigo-600 rounded-xl text-xs text-white font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-500/20 active:scale-95 transition">
+            <i class="fas fa-plus"></i>
+            <span>Add Task</span>
+          </button>
+        </div>
+
+        <!-- Horizontal Interactive Date Strip -->
+        <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1">
+          <div onclick="selectDate(this, 'Mon, Oct 26')" class="date-chip flex-shrink-0 w-13 py-2 px-3 rounded-2xl bg-[#131B2E] border border-[#26334D] text-center cursor-pointer transition hover:border-[#6366F1]">
+            <span class="block text-[10px] text-[#94A3B8] uppercase font-bold">Mon</span>
+            <span class="block text-base font-black text-white">26</span>
+          </div>
+          <div onclick="selectDate(this, 'Tue, Oct 27')" class="date-chip flex-shrink-0 w-13 py-2 px-3 rounded-2xl bg-[#131B2E] border border-[#26334D] text-center cursor-pointer transition hover:border-[#6366F1]">
+            <span class="block text-[10px] text-[#94A3B8] uppercase font-bold">Tue</span>
+            <span class="block text-base font-black text-white">27</span>
+          </div>
+          <div onclick="selectDate(this, 'Wed, Oct 28')" class="date-chip flex-shrink-0 w-13 py-2 px-3 rounded-2xl bg-[#131B2E] border border-[#26334D] text-center cursor-pointer transition hover:border-[#6366F1]">
+            <span class="block text-[10px] text-[#94A3B8] uppercase font-bold">Wed</span>
+            <span class="block text-base font-black text-white">28</span>
+          </div>
+          <!-- Today Active by Default -->
+          <div onclick="selectDate(this, 'Thu, Oct 29')" class="date-chip active flex-shrink-0 w-13 py-2 px-3 rounded-2xl bg-[#6366F1] border border-[#6366F1] text-center cursor-pointer shadow-md shadow-indigo-500/25">
+            <span class="block text-[10px] text-white/80 uppercase font-bold">Today</span>
+            <span class="block text-base font-black text-white">29</span>
+          </div>
+          <div onclick="selectDate(this, 'Fri, Oct 30')" class="date-chip flex-shrink-0 w-13 py-2 px-3 rounded-2xl bg-[#131B2E] border border-[#26334D] text-center cursor-pointer transition hover:border-[#6366F1]">
+            <span class="block text-[10px] text-[#94A3B8] uppercase font-bold">Fri</span>
+            <span class="block text-base font-black text-white">30</span>
+          </div>
+          <div onclick="selectDate(this, 'Sat, Oct 31')" class="date-chip flex-shrink-0 w-13 py-2 px-3 rounded-2xl bg-[#131B2E] border border-[#26334D] text-center cursor-pointer transition hover:border-[#6366F1]">
+            <span class="block text-[10px] text-[#94A3B8] uppercase font-bold">Sat</span>
+            <span class="block text-base font-black text-white">31</span>
+          </div>
+        </div>
+
+        <!-- Task List Header -->
+        <div class="flex items-center justify-between pt-1">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Scheduled Tasks</h2>
+          <span id="taskCountBadge" class="text-xs bg-[#1E293B] text-[#06B6D4] px-2.5 py-0.5 rounded-full font-bold">1/3 Done</span>
+        </div>
+
+        <!-- Dynamic Task Cards Container -->
+        <div class="space-y-3" id="tasksList">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- PRODUCTIVITY ANALYTICS SECTION (Spec 5.4) -->
+        <div class="bg-[#131B2E] border border-[#26334D] rounded-3xl p-4 space-y-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-chart-pie text-[#818CF8]"></i>
+              <span class="font-bold text-sm">Productivity Analytics</span>
+            </div>
+            
+            <!-- Switcher: Weekly / Monthly / Yearly -->
+            <div class="bg-[#1E293B] p-0.5 rounded-xl flex text-[10px] font-bold">
+              <button onclick="switchPeriod(this, 'weekly')" class="period-btn px-2.5 py-1 rounded-lg bg-[#6366F1] text-white">Week</button>
+              <button onclick="switchPeriod(this, 'monthly')" class="period-btn px-2.5 py-1 rounded-lg text-[#94A3B8] hover:text-white">Month</button>
+              <button onclick="switchPeriod(this, 'yearly')" class="period-btn px-2.5 py-1 rounded-lg text-[#94A3B8] hover:text-white">Year</button>
+            </div>
+          </div>
+
+          <!-- 4 Stats Grid -->
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-[#1E293B]/70 p-2.5 rounded-xl border border-[#26334D]/60">
+              <span class="text-[#94A3B8] block text-[10px]">Total Scheduled</span>
+              <span class="text-base font-black text-white" id="statScheduled">12 Tasks</span>
+            </div>
+            <div class="bg-[#1E293B]/70 p-2.5 rounded-xl border border-[#26334D]/60">
+              <span class="text-[#94A3B8] block text-[10px]">Completed</span>
+              <span class="text-base font-black text-[#10B981]" id="statCompleted">8 Tasks</span>
+            </div>
+            <div class="bg-[#1E293B]/70 p-2.5 rounded-xl border border-[#26334D]/60">
+              <span class="text-[#94A3B8] block text-[10px]">Completion Rate</span>
+              <span class="text-base font-black text-[#06B6D4]" id="statRate">67%</span>
+            </div>
+            <div class="bg-[#1E293B]/70 p-2.5 rounded-xl border border-[#26334D]/60">
+              <span class="text-[#94A3B8] block text-[10px]">Points Earned</span>
+              <span class="text-base font-black text-[#F59E0B]" id="statPoints">+80 pts</span>
+            </div>
+          </div>
+
+          <!-- Completion Bar -->
+          <div>
+            <div class="flex justify-between text-[11px] text-[#94A3B8] mb-1">
+              <span>Track Momentum</span>
+              <span id="rateLabel">67% on pace</span>
+            </div>
+            <div class="w-full bg-[#1E293B] h-2.5 rounded-full overflow-hidden">
+              <div id="analyticsBar" class="bg-gradient-to-r from-[#6366F1] to-[#06B6D4] h-full rounded-full transition-all duration-500" style="width: 67%"></div>
+            </div>
+          </div>
+
+          <!-- Trend Bars -->
+          <div>
+            <span class="text-[10px] uppercase font-bold text-[#94A3B8] block mb-2">Daily Completion Trend</span>
+            <div class="flex items-end justify-between h-14 pt-2 px-1">
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-6 bg-[#06B6D4] rounded-t-md" style="height: 24px;"></div>
+                <span class="text-[9px] text-[#94A3B8]">M</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-6 bg-[#06B6D4] rounded-t-md" style="height: 16px;"></div>
+                <span class="text-[9px] text-[#94A3B8]">T</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-6 bg-[#06B6D4] rounded-t-md" style="height: 38px;"></div>
+                <span class="text-[9px] text-[#94A3B8]">W</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-6 bg-[#6366F1] rounded-t-md" style="height: 30px;"></div>
+                <span class="text-[9px] text-white font-bold">T</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-6 bg-[#1E293B] rounded-t-md" style="height: 12px;"></div>
+                <span class="text-[9px] text-[#94A3B8]">F</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-6 bg-[#1E293B] rounded-t-md" style="height: 8px;"></div>
+                <span class="text-[9px] text-[#94A3B8]">S</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-6 bg-[#1E293B] rounded-t-md" style="height: 6px;"></div>
+                <span class="text-[9px] text-[#94A3B8]">S</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: TRACK MODULE (Spec 6) -->
+      <section id="screen-track" class="p-4 space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <h1 class="text-xl font-black">YOUR TRACKS</h1>
+          <button onclick="openCreateTrackModal()" class="text-xs bg-[#6366F1] hover:bg-indigo-600 text-white px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1">
+            <i class="fas fa-plus"></i>
+            <span>New Track</span>
+          </button>
+        </div>
+
+        <!-- Track Filter Pills -->
+        <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1 text-xs">
+          <button onclick="filterTracks('all')" class="track-filter active px-3 py-1 bg-[#6366F1] text-white rounded-full font-semibold">All Tracks</button>
+          <button onclick="filterTracks('active')" class="track-filter px-3 py-1 bg-[#131B2E] text-[#94A3B8] border border-[#26334D] rounded-full">Active</button>
+          <button onclick="filterTracks('completed')" class="track-filter px-3 py-1 bg-[#131B2E] text-[#94A3B8] border border-[#26334D] rounded-full">Completed</button>
+          <button onclick="filterTracks('public')" class="track-filter px-3 py-1 bg-[#131B2E] text-[#94A3B8] border border-[#26334D] rounded-full">Public</button>
+        </div>
+
+        <!-- Track Cards List -->
+        <div class="space-y-3" id="tracksContainer">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- COLLABORATE WITH OTHERS -->
+        <div class="bg-gradient-to-r from-[#131B2E] to-[#1E293B] border border-[#26334D] rounded-3xl p-4 space-y-2">
+          <div class="flex items-center space-x-2 text-[#06B6D4]">
+            <i class="fas fa-globe"></i>
+            <h3 class="font-bold text-sm">COLLABORATE WITH OTHERS</h3>
+          </div>
+          <p class="text-xs text-[#94A3B8]">Explore public study groups and project tracks shared by creators.</p>
+          <button onclick="alert('Joined public community track: Machine Learning Sprint!')" class="w-full py-2 bg-[#1E293B] hover:bg-[#26334D] text-xs font-bold rounded-xl text-white border border-[#26334D]">
+            Explore 14 Public Tracks
+          </button>
+        </div>
+      </section>
+
+      <!-- SCREEN 3: ADD MODULE / CREATION HUB (Spec 7) -->
+      <section id="screen-add" class="p-4 space-y-4 hidden">
+        <div>
+          <h1 class="text-xl font-black">CREATE NEW</h1>
+          <p class="text-xs text-[#94A3B8]">Select an action below to schedule tasks or build roadmaps.</p>
+        </div>
+
+        <div class="space-y-3">
+          <!-- Action 1: Create Task -->
+          <div onclick="openCreateTaskModal()" class="bg-[#131B2E] border border-[#26334D] hover:border-[#6366F1] rounded-2xl p-4 flex items-center space-x-4 cursor-pointer transition group">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#6366F1] to-indigo-700 flex items-center justify-center text-white text-xl">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-sm text-white group-hover:text-[#818CF8] transition">Create Task</h3>
+              <p class="text-xs text-[#94A3B8]">Complete form: priorities, deadlines, recurrence, attachments & collaborators.</p>
+            </div>
+            <i class="fas fa-chevron-right text-xs text-[#94A3B8]"></i>
+          </div>
+
+          <!-- Action 2: Create Track -->
+          <div onclick="openCreateTrackModal()" class="bg-[#131B2E] border border-[#26334D] hover:border-[#06B6D4] rounded-2xl p-4 flex items-center space-x-4 cursor-pointer transition group">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#06B6D4] to-cyan-700 flex items-center justify-center text-white text-xl">
+              <i class="fas fa-route"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-sm text-white group-hover:text-[#06B6D4] transition">Create Track</h3>
+              <p class="text-xs text-[#94A3B8]">Long-term plan with milestones, weekly allotment & flowchart.</p>
+            </div>
+            <i class="fas fa-chevron-right text-xs text-[#94A3B8]"></i>
+          </div>
+
+          <!-- Action 3: AI-Generated Track -->
+          <div onclick="openModal('aiModal')" class="bg-[#131B2E] border border-[#26334D] hover:border-[#F59E0B] rounded-2xl p-4 flex items-center space-x-4 cursor-pointer transition group">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#F59E0B] to-amber-700 flex items-center justify-center text-white text-xl">
+              <i class="fas fa-wand-magic-sparkles"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-sm text-white group-hover:text-[#F59E0B] transition">AI-Generated Track</h3>
+              <p class="text-xs text-[#94A3B8]">Describe your goal in English and let AI structure the plan.</p>
+            </div>
+            <i class="fas fa-chevron-right text-xs text-[#94A3B8]"></i>
+          </div>
+
+          <!-- Action 4: Explore Templates -->
+          <div onclick="applyTemplateBlueprint('Exam Mastery Sprint', 4)" class="bg-[#131B2E] border border-[#26334D] hover:border-[#10B981] rounded-2xl p-4 flex items-center space-x-4 cursor-pointer transition group">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#10B981] to-emerald-700 flex items-center justify-center text-white text-xl">
+              <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-sm text-white group-hover:text-[#10B981] transition">Explore Templates</h3>
+              <p class="text-xs text-[#94A3B8]">Adopt ready-made blueprints with precalculated dates.</p>
+            </div>
+            <i class="fas fa-chevron-right text-xs text-[#94A3B8]"></i>
+          </div>
+        </div>
+
+        <!-- Planning Flowchart Preview (Spec 7.3 E) -->
+        <div class="bg-[#131B2E] border border-[#26334D] rounded-2xl p-4 space-y-3">
+          <div class="flex items-center space-x-2 text-[#F59E0B]">
+            <i class="fas fa-sitemap"></i>
+            <h3 class="font-bold text-xs uppercase tracking-wider">Visual Planning Flowchart Engine</h3>
+          </div>
+          <div class="p-3 bg-[#0B0F19] rounded-xl border border-[#1E293B] text-center space-y-2 text-xs">
+            <div class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 font-bold">
+              GOAL: Full-Stack App Release
+            </div>
+            <i class="fas fa-arrow-down text-[10px] text-[#94A3B8]"></i>
+            <div class="flex justify-center space-x-2">
+              <span class="p-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-[10px] text-emerald-300">M1: Architecture</span>
+              <span class="p-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-[10px] text-emerald-300">M2: Mobile MVP</span>
+            </div>
+            <i class="fas fa-arrow-down text-[10px] text-[#94A3B8]"></i>
+            <div class="flex justify-center space-x-1">
+              <span class="px-2 py-1 bg-cyan-500/10 rounded text-[9px] text-cyan-300">Daily Tasks</span>
+              <span class="px-2 py-1 bg-cyan-500/10 rounded text-[9px] text-cyan-300">Group Tasks</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 4: MESSAGES MODULE (Spec 8) -->
+      <section id="screen-messages" class="p-4 space-y-3 hidden">
+        <div class="flex items-center justify-between">
+          <h1 class="text-xl font-black">Messages</h1>
+          <button onclick="openChatView('Product Launch Core Team', true)" class="text-xs bg-[#6366F1] text-white px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1">
+            <i class="fas fa-edit"></i>
+            <span>New Chat</span>
+          </button>
+        </div>
+
+        <!-- Conversation Threads -->
+        <div class="space-y-2 pt-1">
+          <div onclick="openChatView('Product Launch Core Team', true)" class="bg-[#131B2E] border border-[#26334D] hover:border-[#6366F1] rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition">
+            <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-baseline">
+                <h3 class="font-bold text-sm text-white truncate">Product Launch Core Team</h3>
+                <span class="text-[10px] text-[#94A3B8]">10:14 AM</span>
+              </div>
+              <p class="text-xs text-[#06B6D4] font-medium truncate">Admin assigned task: "Production Deploy"</p>
+            </div>
+            <span class="w-2.5 h-2.5 bg-[#6366F1] rounded-full"></span>
+          </div>
+
+          <div onclick="openChatView('Elena Rostova', false)" class="bg-[#131B2E] border border-[#26334D] hover:border-[#6366F1] rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition">
+            <div class="w-11 h-11 rounded-full bg-cyan-500/20 text-[#06B6D4] flex items-center justify-center font-bold text-sm flex-shrink-0">
+              ER
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-baseline">
+                <h3 class="font-bold text-sm text-white truncate">Elena Rostova</h3>
+                <span class="text-[10px] text-[#94A3B8]">Yesterday</span>
+              </div>
+              <p class="text-xs text-[#94A3B8] truncate">Did you review the study plan for next Tuesday?</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 5: PROFILE MODULE (Spec 9) -->
+      <section id="screen-profile" class="p-4 space-y-4 hidden">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] p-0.5">
+            <div class="w-full h-full bg-[#131B2E] rounded-full flex items-center justify-center text-xl font-black text-white">
+              V
+            </div>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-lg font-black text-white">Venil (TELOS Pilot)</h2>
+            <p class="text-xs text-[#94A3B8]">@venil_explorer</p>
+            <div class="flex space-x-3 mt-2 text-xs">
+              <div><span class="font-black text-white" id="profileTrackCount">2</span> <span class="text-[#94A3B8]">Tracks</span></div>
+              <div><span class="font-black text-[#F59E0B]" id="profilePoints">160</span> <span class="text-[#94A3B8]">Points</span></div>
+              <div><span class="font-black text-[#10B981]">5d</span> <span class="text-[#94A3B8]">Streak 🔥</span></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-[#CBD5E1]">Building high-focus personal productivity habits and full-stack software tracks.</p>
+
+        <!-- Social Posts Feed (Spec 9.3) -->
+        <div class="space-y-3 pt-2">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Recent Updates & Posts</h3>
+            <button onclick="openCreatePostModal()" class="text-xs text-[#818CF8] font-bold"><i class="fas fa-plus mr-1"></i> New Post</button>
+          </div>
+
+          <div id="postsFeedContainer" class="space-y-3">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- PERSISTENT BOTTOM NAVIGATION (Spec 4.3) -->
+    <nav class="absolute bottom-0 left-0 right-0 h-16 bg-[#131B2E]/95 backdrop-blur-md border-t border-[#1E293B] flex items-center justify-around px-2 z-40 select-none safe-bottom">
+      <button onclick="navigateTab('home')" class="nav-tab active flex flex-col items-center justify-center text-[#6366F1] transition">
+        <i class="fas fa-home text-lg"></i>
+        <span class="text-[10px] font-bold mt-1">Home</span>
+      </button>
+
+      <button onclick="navigateTab('track')" class="nav-tab flex flex-col items-center justify-center text-[#94A3B8] hover:text-white transition">
+        <i class="fas fa-route text-lg"></i>
+        <span class="text-[10px] font-bold mt-1">Track</span>
+      </button>
+
+      <button onclick="navigateTab('add')" class="flex flex-col items-center justify-center -mt-5 transition group">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/40 group-hover:scale-105 transition transform">
+          <i class="fas fa-plus"></i>
+        </div>
+        <span class="text-[10px] font-bold text-white mt-1">Add</span>
+      </button>
+
+      <button onclick="navigateTab('messages')" class="nav-tab flex flex-col items-center justify-center text-[#94A3B8] hover:text-white transition">
+        <i class="fas fa-comment-dots text-lg"></i>
+        <span class="text-[10px] font-bold mt-1">Messages</span>
+      </button>
+
+      <button onclick="navigateTab('profile')" class="nav-tab flex flex-col items-center justify-center text-[#94A3B8] hover:text-white transition">
+        <i class="fas fa-user text-lg"></i>
+        <span class="text-[10px] font-bold mt-1">Profile</span>
+      </button>
+    </nav>
+
+    <!-- ==================== FULL TASK CREATION MODAL (PHASE 2 WORKFLOW) ==================== -->
+    <div id="createTaskModal" class="absolute inset-0 bg-[#0B0F19] z-50 flex flex-col transform translate-y-full transition-transform duration-300">
+      <div class="p-4 border-b border-[#1E293B] flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-[#818CF8]">
+          <i class="fas fa-calendar-check text-base"></i>
+          <span class="font-bold text-sm text-white">Create Task</span>
+        </div>
+        <button onclick="closeModal('createTaskModal')" class="text-xs text-[#94A3B8] hover:text-white">Cancel</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs pb-10">
+        <!-- 1. Task Name -->
+        <div>
+          <label class="block font-bold text-white mb-1">Task Title *</label>
+          <input id="taskFormTitle" type="text" placeholder="e.g. Implement WebRTC Calling Signatures" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#6366F1]" />
+        </div>
+
+        <!-- 2. Priority Chips -->
+        <div>
+          <label class="block font-bold text-white mb-1.5">Priority Level</label>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" onclick="setFormPriority('low')" class="priority-btn py-1.5 rounded-lg border border-[#26334D] text-[#10B981] font-bold text-center" data-val="low">Low</button>
+            <button type="button" onclick="setFormPriority('medium')" class="priority-btn py-1.5 rounded-lg border border-[#6366F1] bg-[#6366F1]/20 text-[#06B6D4] font-bold text-center" data-val="medium">Medium</button>
+            <button type="button" onclick="setFormPriority('high')" class="priority-btn py-1.5 rounded-lg border border-[#26334D] text-[#F59E0B] font-bold text-center" data-val="high">High</button>
+            <button type="button" onclick="setFormPriority('urgent')" class="priority-btn py-1.5 rounded-lg border border-[#26334D] text-[#EF4444] font-bold text-center" data-val="urgent">Urgent</button>
+          </div>
+        </div>
+
+        <!-- 3. Description -->
+        <div>
+          <label class="block font-bold text-white mb-1">Description & Instructions</label>
+          <textarea id="taskFormDesc" rows="2" placeholder="Add detailed criteria, instructions, or notes..." class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#6366F1]"></textarea>
+        </div>
+
+        <!-- 4. Date & Time -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-white mb-1">Scheduled Date</label>
+            <input id="taskFormDate" type="date" value="2026-10-29" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-white mb-1">Start Time</label>
+            <input id="taskFormTime" type="time" value="10:00" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white focus:outline-none" />
+          </div>
+        </div>
+
+        <!-- 5. Flags: All Day Until Complete -->
+        <div class="bg-[#131B2E] p-3 rounded-xl border border-[#26334D] space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white block">All Day Until Complete</span>
+              <span class="text-[10px] text-[#94A3B8]">Carries over to each new day until marked done</span>
+            </div>
+            <input id="taskFormAllDayCarry" type="checkbox" checked class="w-4 h-4 accent-[#6366F1]" />
+          </div>
+        </div>
+
+        <!-- 6. Hard Deadline -->
+        <div>
+          <label class="block font-bold text-white mb-1">Hard Deadline (Optional)</label>
+          <input id="taskFormDeadline" type="date" value="2026-11-05" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white focus:outline-none" />
+        </div>
+
+        <!-- 7. Recurrence -->
+        <div>
+          <label class="block font-bold text-white mb-1">Repeat Settings</label>
+          <select id="taskFormRepeat" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white focus:outline-none">
+            <option value="none">No Repetition (One-time Task)</option>
+            <option value="daily">Daily Repetition</option>
+            <option value="weekdays">Selected Weekdays (Mon-Fri)</option>
+            <option value="weekly">Weekly Repetition</option>
+            <option value="monthly">Monthly Repetition</option>
+            <option value="repeat_until_completed">Repeat Until Completed</option>
+          </select>
+        </div>
+
+        <!-- 8. Track Selector -->
+        <div>
+          <label class="block font-bold text-white mb-1">Assign to Track</label>
+          <select id="taskFormTrack" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white focus:outline-none">
+            <option value="">Standalone Task (No Track)</option>
+            <option value="Full-Stack App Launch Roadmap">Full-Stack App Launch Roadmap</option>
+            <option value="Exam Mastery & Deep Focus Sprint">Exam Mastery & Deep Focus Sprint</option>
+          </select>
+        </div>
+
+        <!-- 9. Collaborators & Role -->
+        <div>
+          <label class="block font-bold text-white mb-1">Add Collaborator</label>
+          <div class="flex space-x-2">
+            <input id="taskFormCollabName" type="text" placeholder="Name or email" class="flex-1 bg-[#131B2E] border border-[#26334D] rounded-xl px-3 py-2 text-white focus:outline-none" />
+            <select id="taskFormCollabRole" class="bg-[#131B2E] border border-[#26334D] rounded-xl px-2 text-white text-[11px]">
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+              <option value="owner">Co-Owner</option>
+            </select>
+            <button type="button" onclick="addCollabTag()" class="px-3 bg-[#1E293B] hover:bg-[#26334D] text-white rounded-xl font-bold">+</button>
+          </div>
+          <div id="collabTagsContainer" class="flex flex-wrap gap-1.5 mt-2">
+            <span class="px-2 py-0.5 bg-indigo-500/20 text-[#818CF8] rounded-md text-[10px]">You (Owner)</span>
+          </div>
+        </div>
+
+        <!-- 10. Visibility & Passcode -->
+        <div class="bg-[#131B2E] p-3 rounded-xl border border-[#26334D] space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-white">Private Access Passcode</span>
+            <span class="font-black text-amber-400 tracking-wider">TL-8X9PK2</span>
+          </div>
+          <p class="text-[10px] text-[#94A3B8]">Generated secure link: https://telos.app/join/task/8X9PK2</p>
+        </div>
+
+        <!-- Save Button -->
+        <div class="pt-2">
+          <button type="button" onclick="submitFullTaskForm()" class="w-full py-3 bg-[#6366F1] hover:bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-500/25 active:scale-95 transition">
+            Save Task & Schedule
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== FULL CREATE TRACK MODAL ==================== -->
+    <div id="createTrackModal" class="absolute inset-0 bg-[#0B0F19] z-50 flex flex-col transform translate-y-full transition-transform duration-300">
+      <div class="p-4 border-b border-[#1E293B] flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-[#06B6D4]">
+          <i class="fas fa-route text-base"></i>
+          <span class="font-bold text-sm text-white">Create Track</span>
+        </div>
+        <button onclick="closeModal('createTrackModal')" class="text-xs text-[#94A3B8] hover:text-white">Cancel</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs pb-10">
+        <div>
+          <label class="block font-bold text-white mb-1">Track Title *</label>
+          <input id="trackFormTitle" type="text" placeholder="e.g. 30-Day Physical Conditioning Track" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]" />
+        </div>
+        <div>
+          <label class="block font-bold text-white mb-1">Description & Goal</label>
+          <textarea id="trackFormDesc" rows="2" placeholder="Define target outcome, scope, and rules..." class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-white mb-1">Start Date</label>
+            <input id="trackFormStart" type="date" value="2026-10-29" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white" />
+          </div>
+          <div>
+            <label class="block font-bold text-white mb-1">End Date</label>
+            <input id="trackFormEnd" type="date" value="2026-11-28" class="w-full bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-white mb-1">Category & Visibility</label>
+          <div class="grid grid-cols-2 gap-2">
+            <select id="trackFormCategory" class="bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white">
+              <option value="productivity">Productivity</option>
+              <option value="academic">Academic</option>
+              <option value="project">Project</option>
+              <option value="fitness">Fitness</option>
+            </select>
+            <select id="trackFormVisibility" class="bg-[#131B2E] border border-[#26334D] rounded-xl px-2.5 py-2 text-white">
+              <option value="private">Private Track</option>
+              <option value="public">Public Track</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Milestones -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="font-bold text-white">Milestones</label>
+            <button type="button" onclick="addMilestoneInput()" class="text-[#06B6D4] font-bold">+ Add</button>
+          </div>
+          <div id="milestonesContainer" class="space-y-1.5">
+            <input type="text" value="Phase 1: Foundation & Baseline" class="w-full bg-[#131B2E] border border-[#26334D] rounded-lg px-2.5 py-1.5 text-white" />
+            <input type="text" value="Phase 2: Core Execution Sprint" class="w-full bg-[#131B2E] border border-[#26334D] rounded-lg px-2.5 py-1.5 text-white" />
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button type="button" onclick="submitFullTrackForm()" class="w-full py-3 bg-[#06B6D4] hover:bg-cyan-600 text-[#0B0F19] font-bold rounded-xl text-sm active:scale-95 transition">
+            Create & Finalize Track
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TASK DETAILS ("MORE TO KNOW") MODAL ==================== -->
+    <div id="taskDetailsModal" class="absolute inset-0 bg-[#0B0F19] z-50 flex flex-col transform translate-y-full transition-transform duration-300">
+      <div class="p-4 border-b border-[#1E293B] flex items-center justify-between">
+        <span class="font-bold text-sm text-white">Task Details (More to Know)</span>
+        <button onclick="closeModal('taskDetailsModal')" class="text-xs text-[#94A3B8] hover:text-white">Close</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs pb-10">
+        <div class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center space-x-2 text-emerald-400 font-bold">
+          <i class="fas fa-check-circle"></i>
+          <span id="detailStatusBanner">Active Task • Pending Completion</span>
+        </div>
+
+        <div>
+          <h2 id="detailTitle" class="text-lg font-black text-white">Review System Architecture</h2>
+          <p id="detailDesc" class="text-xs text-[#94A3B8] mt-1">Evaluate cross-platform synchronization and check off Phase 1 requirements.</p>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-[#1E293B]">
+          <div class="flex justify-between py-1.5 border-b border-[#1E293B]">
+            <span class="text-[#94A3B8]">Scheduled Date</span>
+            <span id="detailDate" class="font-bold text-white">Oct 29, 2026</span>
+          </div>
+          <div class="flex justify-between py-1.5 border-b border-[#1E293B]">
+            <span class="text-[#94A3B8]">Start Time</span>
+            <span id="detailTime" class="font-bold text-white">09:30 AM</span>
+          </div>
+          <div class="flex justify-between py-1.5 border-b border-[#1E293B]">
+            <span class="text-[#94A3B8]">Associated Track</span>
+            <span id="detailTrack" class="font-bold text-[#818CF8]">Full-Stack Roadmap</span>
+          </div>
+          <div class="flex justify-between py-1.5 border-b border-[#1E293B]">
+            <span class="text-[#94A3B8]">Priority</span>
+            <span id="detailPriority" class="font-bold text-[#F59E0B]">HIGH</span>
+          </div>
+          <div class="flex justify-between py-1.5 border-b border-[#1E293B]">
+            <span class="text-[#94A3B8]">Repeat Rule</span>
+            <span id="detailRepeat" class="font-bold text-white">Daily Recurring</span>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button onclick="deleteCurrentTask()" class="w-full py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold rounded-xl text-xs active:scale-95 transition">
+            Delete Task
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI CHATBOT MODAL (Spec 11) -->
+    <div id="aiModal" class="absolute inset-0 bg-[#0B0F19] z-50 flex flex-col transform translate-y-full transition-transform duration-300">
+      <div class="p-4 border-b border-[#1E293B] flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-[#06B6D4]">
+          <i class="fas fa-robot text-lg"></i>
+          <span class="font-bold text-sm text-white">TELOS AI Planning Assistant</span>
+        </div>
+        <button onclick="closeModal('aiModal')" class="w-8 h-8 rounded-lg bg-[#1E293B] flex items-center justify-center text-white">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <div class="p-3 border-b border-[#1E293B] flex space-x-2 overflow-x-auto no-scrollbar text-xs">
+        <button onclick="askAIPrompt('What tasks do I have scheduled today?')" class="flex-shrink-0 px-2.5 py-1 bg-[#131B2E] border border-[#26334D] hover:border-[#06B6D4] rounded-full text-[#94A3B8] hover:text-white">
+          Tasks today?
+        </button>
+        <button onclick="askAIPrompt('Create a 4-week exam preparation plan')" class="flex-shrink-0 px-2.5 py-1 bg-[#131B2E] border border-[#26334D] hover:border-[#06B6D4] rounded-full text-[#94A3B8] hover:text-white">
+          Plan 4-week exam sprint
+        </button>
+        <button onclick="askAIPrompt('Which tracks are falling behind?')" class="flex-shrink-0 px-2.5 py-1 bg-[#131B2E] border border-[#26334D] hover:border-[#06B6D4] rounded-full text-[#94A3B8] hover:text-white">
+          Check overdue
+        </button>
+      </div>
+
+      <div id="aiChatStream" class="flex-1 overflow-y-auto p-4 space-y-3 text-xs">
+        <div class="bg-[#131B2E] border border-[#26334D] p-3 rounded-2xl text-[#CBD5E1] space-y-1 max-w-[85%]">
+          <span class="font-bold text-[#06B6D4] block text-[10px]">TELOS AI</span>
+          <p>Hello! I am your AI Planning Assistant. Ask me about your tasks, overdue items, or tell me to generate a 4-week roadmap.</p>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-[#1E293B] bg-[#131B2E] flex items-center space-x-2 safe-bottom">
+        <input id="aiInput" type="text" placeholder="Ask AI to plan, reschedule, or inspect..." class="flex-1 bg-[#0B0F19] border border-[#26334D] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#06B6D4]" onkeydown="if(event.key==='Enter')sendAIMessage()" />
+        <button onclick="sendAIMessage()" class="w-9 h-9 rounded-xl bg-[#06B6D4] text-[#0B0F19] flex items-center justify-center font-bold">
+          <i class="fas fa-paper-plane text-xs"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- REWARDS CHEST MODAL (Spec 13) -->
+    <div id="rewardsModal" class="absolute inset-0 bg-[#0B0F19] z-50 flex flex-col transform translate-y-full transition-transform duration-300">
+      <div class="p-4 border-b border-[#1E293B] flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-[#F59E0B]">
+          <i class="fas fa-award text-lg"></i>
+          <span class="font-bold text-sm text-white">Points Chest & Gamification</span>
+        </div>
+        <button onclick="closeModal('rewardsModal')" class="w-8 h-8 rounded-lg bg-[#1E293B] flex items-center justify-center text-white">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs pb-10">
+        <div class="bg-gradient-to-tr from-[#2E1065] to-[#1E1B4B] border border-amber-500/30 rounded-3xl p-5 text-center space-y-2">
+          <div class="w-14 h-14 mx-auto rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 text-2xl">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <h2 id="modalPointsBalance" class="text-3xl font-black text-white">160</h2>
+          <p class="text-[11px] text-[#94A3B8]">Total Accumulated Points</p>
+          <div class="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-center">
+            <div><span class="block font-bold text-white">+40 pts</span><span class="text-[9px] text-[#94A3B8]">This Week</span></div>
+            <div><span class="block font-bold text-white">+120 pts</span><span class="text-[9px] text-[#94A3B8]">This Month</span></div>
+            <div><span class="block font-bold text-emerald-400">5d Streak</span><span class="text-[9px] text-[#94A3B8]">Consistency</span></div>
+          </div>
+        </div>
+
+        <h3 class="font-bold text-sm text-white pt-2">Unlocked Achievements</h3>
+        <div class="space-y-2">
+          <div class="bg-[#131B2E] border border-amber-500/30 rounded-2xl p-3 flex items-center space-x-3">
+            <i class="fas fa-medal text-amber-400 text-lg"></i>
+            <div class="flex-1">
+              <span class="font-bold text-white block">Initiator</span>
+              <span class="text-[10px] text-[#94A3B8]">Created and configured your first Track</span>
+            </div>
+            <span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">UNLOCKED</span>
+          </div>
+          <div class="bg-[#131B2E] border border-amber-500/30 rounded-2xl p-3 flex items-center space-x-3">
+            <i class="fas fa-fire text-amber-400 text-lg"></i>
+            <div class="flex-1">
+              <span class="font-bold text-white block">Unstoppable Momentum</span>
+              <span class="text-[10px] text-[#94A3B8]">Maintained a 5-day active sprint streak</span>
+            </div>
+            <span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">UNLOCKED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS MODAL (Spec 12) -->
+    <div id="settingsModal" class="absolute inset-0 bg-[#0B0F19] z-50 flex flex-col transform translate-y-full transition-transform duration-300">
+      <div class="p-4 border-b border-[#1E293B] flex items-center justify-between">
+        <span class="font-bold text-sm text-white">Settings</span>
+        <button onclick="closeModal('settingsModal')" class="w-8 h-8 rounded-lg bg-[#1E293B] flex items-center justify-center text-white">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs pb-10">
+        <!-- Backend API Endpoint Config -->
+        <div class="bg-[#131B2E] border border-[#26334D] rounded-2xl p-3 space-y-2">
+          <span class="font-bold text-white block">Backend Cloud Connection</span>
+          <p class="text-[10px] text-[#94A3B8]">Connect this web/mobile interface to your deployed Node.js backend & MongoDB.</p>
+          <div class="flex space-x-2">
+            <input id="customApiUrl" type="text" placeholder="http://localhost:5000" class="flex-1 bg-[#0B0F19] border border-[#26334D] rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none" />
+            <button onclick="testBackendConnection()" class="px-3 py-1.5 bg-[#6366F1] hover:bg-indigo-600 text-white rounded-xl font-bold text-[10px]">Test</button>
+          </div>
+          <span id="backendStatusNotice" class="text-[10px] text-[#10B981] block">Running in fast local & offline storage mode.</span>
+        </div>
+
+        <div class="bg-[#131B2E] border border-[#26334D] rounded-2xl p-3 flex items-center justify-between">
+          <div>
+            <span class="font-bold text-white block">Theme Palette</span>
+            <span class="text-[10px] text-[#94A3B8]">Currently Dark Theme (OLED optimized)</span>
+          </div>
+          <button onclick="alert('Theme preferences saved!')" class="px-2.5 py-1 bg-[#1E293B] rounded-lg text-white font-bold">Dark</button>
+        </div>
+
+        <div class="bg-[#131B2E] border border-[#26334D] rounded-2xl p-3 space-y-3">
+          <span class="font-bold text-white block">Notification Controls</span>
+          <div class="flex items-center justify-between">
+            <span class="text-[#CBD5E1]">Task Reminders</span>
+            <input type="checkbox" checked class="accent-[#6366F1]" />
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[#CBD5E1]">Deadline Warnings</span>
+            <input type="checkbox" checked class="accent-[#6366F1]" />
+          </div>
+        </div>
+
+        <button onclick="clearUserData()" class="w-full py-2.5 bg-[#EF4444]/15 border border-[#EF4444]/30 text-[#EF4444] rounded-xl font-bold">
+          Reset Data & Log Out
+        </button>
+      </div>
+    </div>
+
+    <!-- SEARCH MODAL (Spec 10) -->
+    <div id="searchModal" class="absolute inset-0 bg-[#0B0F19] z-50 flex flex-col transform translate-y-full transition-transform duration-300">
+      <div class="p-3 border-b border-[#1E293B] flex items-center space-x-2">
+        <i class="fas fa-search text-[#94A3B8] text-xs"></i>
+        <input id="searchInput" oninput="liveSearch(this.value)" type="text" placeholder="Search tasks, tracks, or navigation commands..." class="flex-1 bg-transparent text-xs text-white focus:outline-none" />
+        <button onclick="closeModal('searchModal')" class="text-xs text-[#94A3B8] hover:text-white">Cancel</button>
+      </div>
+      <div id="searchResults" class="flex-1 overflow-y-auto p-4 space-y-2 text-xs">
+        <span class="text-[10px] text-[#94A3B8] uppercase font-bold block">Quick Commands</span>
+        <div onclick="navigateTab('add');closeModal('searchModal')" class="p-2.5 bg-[#131B2E] rounded-xl flex items-center space-x-2 cursor-pointer hover:bg-[#1E293B]">
+          <i class="fas fa-plus text-[#818CF8]"></i>
+          <span class="text-white font-medium">Create a new Task or Track</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COMPLETE CLIENT-SIDE SCRIPT & PERSISTENCE -->
+  <script>
+    let API_BASE = localStorage.getItem('telos_api_base') || 'http://localhost:5000/api/v1';
+    let points = 160;
+    let currentTaskDetailId = null;
+    let selectedPriority = 'medium';
+
+    // Seed Data (Used if localStorage is empty)
+    const DEFAULT_TASKS = [
+      {
+        id: 'task_1',
+        title: 'Review System Architecture & Track Milestones',
+        description: 'Validate clean architecture, offline storage, and socket events.',
+        priority: 'high',
+        time: '09:30 AM',
+        date: '2026-10-29',
+        track: 'Full-Stack App Launch Roadmap',
+        repeat: 'none',
+        status: 'pending',
+        points: 0
+      },
+      {
+        id: 'task_2',
+        title: 'Daily Deep Focus Sprint (45 mins)',
+        description: 'Uninterrupted sprint on core TELOS features without distractions.',
+        priority: 'medium',
+        time: '11:00 AM',
+        date: '2026-10-29',
+        track: 'Personal Focus',
+        repeat: 'daily',
+        status: 'pending',
+        points: 0
+      },
+      {
+        id: 'task_3',
+        title: 'Team Weekly Milestone Alignment',
+        description: 'Collaborative check-in with Track members on progress.',
+        priority: 'medium',
+        time: '04:00 PM',
+        date: '2026-10-29',
+        track: 'Exam Mastery & Deep Focus Sprint',
+        repeat: 'weekly',
+        status: 'completed',
+        points: 10
+      }
+    ];
+
+    const DEFAULT_TRACKS = [
+      {
+        id: 'track_1',
+        title: 'Full-Stack App Launch Roadmap',
+        description: 'Complete 30-day product launch track from architecture to release.',
+        category: 'project',
+        visibility: 'public',
+        dates: 'Oct 24 - Nov 23',
+        progress: 42,
+        totalTasks: 12,
+        completedTasks: 5,
+        collaborators: 3
+      },
+      {
+        id: 'track_2',
+        title: 'Exam Mastery & Deep Focus Sprint',
+        description: 'High-yield module breakdown, 50 past paper problems, and mock tests.',
+        category: 'academic',
+        visibility: 'private',
+        dates: 'Oct 15 - Nov 12',
+        progress: 65,
+        totalTasks: 20,
+        completedTasks: 13,
+        collaborators: 1
+      }
+    ];
+
+    const DEFAULT_POSTS = [
+      {
+        id: 'post_1',
+        author: 'Venil',
+        time: '4 hours ago • Public Track',
+        text: 'Week 1 of our software architecture track passed all checks! TELOS is live on mobile web.',
+        likes: 14,
+        comments: 3,
+        liked: false
+      }
+    ];
+
+    let tasks = [];
+    let tracks = [];
+    let posts = [];
+
+    // Local Storage Sync
+    function loadData() {
+      try {
+        const storedTasks = localStorage.getItem('telos_tasks');
+        tasks = storedTasks ? JSON.parse(storedTasks) : [...DEFAULT_TASKS];
+
+        const storedTracks = localStorage.getItem('telos_tracks');
+        tracks = storedTracks ? JSON.parse(storedTracks) : [...DEFAULT_TRACKS];
+
+        const storedPosts = localStorage.getItem('telos_posts');
+        posts = storedPosts ? JSON.parse(storedPosts) : [...DEFAULT_POSTS];
+
+        const storedPoints = localStorage.getItem('telos_points');
+        points = storedPoints ? parseInt(storedPoints, 10) : 160;
+
+        const storedApi = localStorage.getItem('telos_api_base');
+        if (storedApi) {
+          const apiInput = document.getElementById('customApiUrl');
+          if (apiInput) apiInput.value = storedApi;
+        }
+      } catch (err) {
+        console.error('Failed reading local storage:', err);
+        tasks = [...DEFAULT_TASKS];
+        tracks = [...DEFAULT_TRACKS];
+        posts = [...DEFAULT_POSTS];
+      }
+    }
+
+    function persistState() {
+      try {
+        localStorage.setItem('telos_tasks', JSON.stringify(tasks));
+        localStorage.setItem('telos_tracks', JSON.stringify(tracks));
+        localStorage.setItem('telos_posts', JSON.stringify(posts));
+        localStorage.setItem('telos_points', points.toString());
+      } catch (err) {
+        console.error('Failed writing local storage:', err);
+      }
+    }
+
+    function clearUserData() {
+      if (confirm('Reset all tasks, tracks, and points back to defaults?')) {
+        localStorage.clear();
+        loadData();
+        renderTasks();
+        renderTracks();
+        renderPosts();
+        updatePointsDisplay();
+        closeModal('settingsModal');
+      }
+    }
+
+    function updatePointsDisplay() {
+      document.getElementById('pointsBadge').innerText = points;
+      document.getElementById('modalPointsBalance').innerText = points;
+      document.getElementById('profilePoints').innerText = points;
+    }
+
+    // Initialize UI on load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      renderTasks();
+      renderTracks();
+      renderPosts();
+      updatePointsDisplay();
+    });
+
+    function renderTasks() {
+      const container = document.getElementById('tasksList');
+      container.innerHTML = '';
+
+      let completedCount = 0;
+      tasks.forEach(t => {
+        const isDone = t.status === 'completed';
+        if (isDone) completedCount++;
+
+        const card = document.createElement('div');
+        card.className = `task-card bg-[#131B2E] border border-[#26334D] rounded-2xl p-3.5 transition duration-200 ${isDone ? 'opacity-60' : 'hover:border-[#384969]'}`;
+        card.innerHTML = `
+          <div class="flex items-start space-x-3">
+            <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleTaskState('${t.id}')" class="mt-1 w-5 h-5 rounded-md accent-[#10B981] cursor-pointer" />
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm ${isDone ? 'line-through text-[#94A3B8]' : 'text-white'}">${escapeHtml(t.title)}</h3>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${t.priority === 'urgent' ? 'bg-rose-500/20 text-rose-400' : t.priority === 'high' ? 'bg-amber-500/20 text-amber-400' : 'bg-cyan-500/20 text-cyan-400'} uppercase">${t.priority || 'MED'}</span>
+              </div>
+              <p class="text-xs text-[#94A3B8] line-clamp-1 mt-0.5">${escapeHtml(t.description || '')}</p>
+              
+              <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-[#1E293B] text-[11px]">
+                <div class="flex items-center space-x-2">
+                  <span class="text-[#94A3B8]"><i class="far fa-clock text-[#818CF8]"></i> ${t.time || 'All Day'}</span>
+                  ${t.track ? `<span class="px-1.5 py-0.5 rounded bg-indigo-500/10 text-[#818CF8] font-medium truncate max-w-[120px]">${escapeHtml(t.track)}</span>` : ''}
+                </div>
+                <button onclick="openTaskDetails('${t.id}')" class="text-[#818CF8] hover:text-white font-semibold flex items-center space-x-1">
+                  <span>More to Know</span>
+                  <i class="fas fa-chevron-right text-[9px]"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      const total = tasks.length;
+      const rate = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+      document.getElementById('taskCountBadge').innerText = `${completedCount}/${total} Done`;
+      document.getElementById('statCompleted').innerText = `${completedCount} Tasks`;
+      document.getElementById('statScheduled').innerText = `${total} Tasks`;
+      document.getElementById('statRate').innerText = `${rate}%`;
+      document.getElementById('rateLabel').innerText = `${rate}% on pace`;
+      document.getElementById('analyticsBar').style.width = `${rate}%`;
+    }
+
+    function renderTracks() {
+      const container = document.getElementById('tracksContainer');
+      container.innerHTML = '';
+
+      tracks.forEach(tr => {
+        const card = document.createElement('div');
+        card.className = 'bg-[#131B2E] border border-[#26334D] rounded-3xl p-4 space-y-3';
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-[#818CF8] uppercase">${tr.category}</span>
+              <h3 class="font-bold text-base mt-1 text-white">${escapeHtml(tr.title)}</h3>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${tr.visibility === 'public' ? 'bg-cyan-500/10 text-[#06B6D4]' : 'bg-slate-500/20 text-[#94A3B8]'} uppercase">${tr.visibility}</span>
+          </div>
+          <p class="text-xs text-[#94A3B8]">${escapeHtml(tr.description || '')}</p>
+
+          <div>
+            <div class="flex justify-between text-xs text-[#94A3B8] mb-1">
+              <span>${tr.dates}</span>
+              <span class="text-[#10B981] font-bold">${tr.progress}% Done</span>
+            </div>
+            <div class="w-full bg-[#1E293B] h-2 rounded-full overflow-hidden">
+              <div class="bg-[#10B981] h-full rounded-full" style="width: ${tr.progress}%"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-[#1E293B] text-xs">
+            <span class="text-[#94A3B8]"><i class="fas fa-tasks mr-1 text-[#06B6D4]"></i> ${tr.completedTasks}/${tr.totalTasks} Tasks</span>
+            <span class="text-[#94A3B8]"><i class="fas fa-users mr-1 text-[#818CF8]"></i> ${tr.collaborators} Collaborators</span>
+            <button onclick="showTrackMenu('${escapeHtml(tr.title)}', ${tr.progress})" class="px-2.5 py-1 bg-[#1E293B] hover:bg-[#26334D] text-[#818CF8] font-bold rounded-lg text-xs">
+              Options <i class="fas fa-ellipsis-v ml-1"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      document.getElementById('profileTrackCount').innerText = tracks.length;
+    }
+
+    function renderPosts() {
+      const container = document.getElementById('postsFeedContainer');
+      container.innerHTML = '';
+
+      posts.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'bg-[#131B2E] border border-[#26334D] rounded-2xl p-3.5 space-y-2.5';
+        card.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <div class="w-7 h-7 rounded-full bg-[#6366F1] flex items-center justify-center text-xs font-bold text-white">${p.author[0]}</div>
+            <div>
+              <span class="text-xs font-bold text-white block">${p.author}</span>
+              <span class="text-[10px] text-[#94A3B8]">${p.time}</span>
+            </div>
+          </div>
+          <p class="text-xs text-[#CBD5E1]">${escapeHtml(p.text)}</p>
+          <div class="flex items-center space-x-4 pt-2 border-t border-[#1E293B] text-xs text-[#94A3B8]">
+            <button onclick="toggleLikePost('${p.id}')" class="hover:text-[#EF4444] flex items-center space-x-1 ${p.liked ? 'text-[#EF4444]' : ''}">
+              <i class="${p.liked ? 'fas' : 'far'} fa-heart"></i> <span>${p.likes}</span>
+            </button>
+            <button onclick="alert('Comment added to feed update!')" class="hover:text-white flex items-center space-x-1">
+              <i class="far fa-comment"></i> <span>${p.comments}</span>
+            </button>
+            <button onclick="alert('Shared link copied to clipboard!')" class="hover:text-white flex items-center space-x-1">
+              <i class="far fa-share-square"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Toggle Task & Award Points
+    function toggleTaskState(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      const wasCompleted = task.status === 'completed';
+      task.status = wasCompleted ? 'pending' : 'completed';
+
+      if (!wasCompleted) {
+        points += 10;
+        task.points = 10;
+      } else {
+        points = Math.max(0, points - 10);
+        task.points = 0;
+      }
+
+      updatePointsDisplay();
+      persistState();
+      renderTasks();
+    }
+
+    // Open Complete Task Creation Modal (Phase 2 Form)
+    function openCreateTaskModal() {
+      document.getElementById('taskFormTitle').value = '';
+      document.getElementById('taskFormDesc').value = '';
+      openModal('createTaskModal');
+    }
+
+    function setFormPriority(p) {
+      selectedPriority = p;
+      document.querySelectorAll('.priority-btn').forEach(btn => {
+        if (btn.dataset.val === p) {
+          btn.classList.add('bg-[#6366F1]/20', 'border-[#6366F1]');
+        } else {
+          btn.classList.remove('bg-[#6366F1]/20', 'border-[#6366F1]');
+        }
+      });
+    }
+
+    function addCollabTag() {
+      const input = document.getElementById('taskFormCollabName');
+      const role = document.getElementById('taskFormCollabRole').value;
+      const name = input.value.trim();
+      if (!name) return;
+
+      const container = document.getElementById('collabTagsContainer');
+      const tag = document.createElement('span');
+      tag.className = 'px-2 py-0.5 bg-cyan-500/20 text-[#06B6D4] rounded-md text-[10px] flex items-center space-x-1';
+      tag.innerHTML = `<span>${escapeHtml(name)} (${role})</span> <i class="fas fa-times cursor-pointer ml-1" onclick="this.parentElement.remove()"></i>`;
+      container.appendChild(tag);
+      input.value = '';
+    }
+
+    function submitFullTaskForm() {
+      const title = document.getElementById('taskFormTitle').value.trim();
+      const desc = document.getElementById('taskFormDesc').value.trim();
+      const date = document.getElementById('taskFormDate').value;
+      const time = document.getElementById('taskFormTime').value;
+      const track = document.getElementById('taskFormTrack').value;
+      const repeat = document.getElementById('taskFormRepeat').value;
+
+      if (!title) {
+        alert('Please enter a task title.');
+        return;
+      }
+
+      const newTask = {
+        id: 'task_' + Date.now(),
+        title,
+        description: desc,
+        priority: selectedPriority,
+        date,
+        time: time ? formatTime(time) : 'All Day',
+        track: track || null,
+        repeat,
+        status: 'pending',
+        points: 0
+      };
+
+      tasks.unshift(newTask);
+      persistState();
+      closeModal('createTaskModal');
+      renderTasks();
+      navigateTab('home');
+      alert(`Task "${title}" created and scheduled!`);
+    }
+
+    function openCreateTrackModal() {
+      document.getElementById('trackFormTitle').value = '';
+      document.getElementById('trackFormDesc').value = '';
+      openModal('createTrackModal');
+    }
+
+    function addMilestoneInput() {
+      const container = document.getElementById('milestonesContainer');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = `Milestone ${container.children.length + 1}`;
+      input.className = 'w-full bg-[#131B2E] border border-[#26334D] rounded-lg px-2.5 py-1.5 text-white';
+      container.appendChild(input);
+    }
+
+    function submitFullTrackForm() {
+      const title = document.getElementById('trackFormTitle').value.trim();
+      const desc = document.getElementById('trackFormDesc').value.trim();
+      const cat = document.getElementById('trackFormCategory').value;
+      const vis = document.getElementById('trackFormVisibility').value;
+
+      if (!title) {
+        alert('Please enter a Track title.');
+        return;
+      }
+
+      const newTrack = {
+        id: 'track_' + Date.now(),
+        title,
+        description: desc,
+        category: cat,
+        visibility: vis,
+        dates: 'Oct 29 - Nov 28',
+        progress: 0,
+        totalTasks: 4,
+        completedTasks: 0,
+        collaborators: 1
+      };
+
+      tracks.unshift(newTrack);
+      persistState();
+      closeModal('createTrackModal');
+      renderTracks();
+      navigateTab('track');
+      alert(`Track "${title}" created with visual planning flowchart!`);
+    }
+
+    function openTaskDetails(id) {
+      const t = tasks.find(item => item.id === id);
+      if (!t) return;
+      currentTaskDetailId = id;
+
+      document.getElementById('detailTitle').innerText = t.title;
+      document.getElementById('detailDesc').innerText = t.description || 'No detailed instructions provided.';
+      document.getElementById('detailDate').innerText = t.date;
+      document.getElementById('detailTime').innerText = t.time;
+      document.getElementById('detailTrack').innerText = t.track || 'Standalone Task (No Track)';
+      document.getElementById('detailPriority').innerText = (t.priority || 'medium').toUpperCase();
+      document.getElementById('detailRepeat').innerText = t.repeat === 'none' ? 'One-time Task' : t.repeat.toUpperCase();
+      document.getElementById('detailStatusBanner').innerText = t.status === 'completed' ? 'Completed (+10 pts earned)' : 'Active Task • Pending Completion';
+
+      openModal('taskDetailsModal');
+    }
+
+    function deleteCurrentTask() {
+      if (!currentTaskDetailId) return;
+      tasks = tasks.filter(t => t.id !== currentTaskDetailId);
+      persistState();
+      closeModal('taskDetailsModal');
+      renderTasks();
+      alert('Task deleted successfully.');
+    }
+
+    function showTrackMenu(title, progress) {
+      alert(`[Track Options: "${title}"]\n\n• 📊 Overall Analytics (${progress}% Done)\n• 📅 Day-to-Day Tasks\n• 🗓️ Weekly Allotment\n• 📆 Monthly Allotment\n• 👥 Collaborator Timeline & History\n• 💬 Track-Specific Chat Room\n• ✨ AI-Assisted Track Editing`);
+    }
+
+    function applyTemplateBlueprint(name, weeks) {
+      tracks.unshift({
+        id: 'track_' + Date.now(),
+        title: name,
+        description: 'Adopted from blueprint templates with precalculated deadlines.',
+        category: 'academic',
+        visibility: 'private',
+        dates: 'Oct 29 - Nov 26',
+        progress: 0,
+        totalTasks: 6,
+        completedTasks: 0,
+        collaborators: 1
+      });
+      persistState();
+      renderTracks();
+      navigateTab('track');
+      alert(`Template "${name}" instantiated into Your Tracks!`);
+    }
+
+    function openCreatePostModal() {
+      const text = prompt('Share a win, milestone progress, or productivity streak:');
+      if (text && text.trim()) {
+        posts.unshift({
+          id: 'post_' + Date.now(),
+          author: 'Venil',
+          time: 'Just now • Public',
+          text: text.trim(),
+          likes: 0,
+          comments: 0,
+          liked: false
+        });
+        persistState();
+        renderPosts();
+        navigateTab('profile');
+      }
+    }
+
+    function toggleLikePost(id) {
+      const p = posts.find(item => item.id === id);
+      if (!p) return;
+      p.liked = !p.liked;
+      p.likes += p.liked ? 1 : -1;
+      persistState();
+      renderPosts();
+    }
+
+    // Modal helpers
+    function openModal(id) {
+      document.getElementById(id).classList.remove('translate-y-full');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('translate-y-full');
+    }
+
+    function navigateTab(tabId) {
+      document.querySelectorAll('#appBody > section').forEach(el => el.classList.add('hidden'));
+      const activeScreen = document.getElementById(`screen-${tabId}`);
+      if (activeScreen) activeScreen.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab').forEach(el => {
+        el.classList.remove('active', 'text-[#6366F1]');
+        el.classList.add('text-[#94A3B8]');
+      });
+      const activeBtn = event.currentTarget;
+      if (activeBtn && activeBtn.classList.contains('nav-tab')) {
+        activeBtn.classList.add('active', 'text-[#6366F1]');
+        activeBtn.classList.remove('text-[#94A3B8]');
+      }
+    }
+
+    function selectDate(chip, label) {
+      document.querySelectorAll('.date-chip').forEach(c => {
+        c.classList.remove('bg-[#6366F1]', 'border-[#6366F1]');
+        c.classList.add('bg-[#131B2E]', 'border-[#26334D]');
+      });
+      chip.classList.add('bg-[#6366F1]', 'border-[#6366F1]');
+      chip.classList.remove('bg-[#131B2E]', 'border-[#26334D]');
+      document.getElementById('headerDay').innerText = label.split(',')[0];
+    }
+
+    function switchPeriod(btn, period) {
+      document.querySelectorAll('.period-btn').forEach(b => {
+        b.classList.remove('bg-[#6366F1]', 'text-white');
+        b.classList.add('text-[#94A3B8]');
+      });
+      btn.classList.add('bg-[#6366F1]', 'text-white');
+      btn.classList.remove('text-[#94A3B8]');
+      
+      if (period === 'weekly') {
+        document.getElementById('statScheduled').innerText = `${tasks.length} Tasks`;
+        document.getElementById('statPoints').innerText = `+80 pts`;
+      } else if (period === 'monthly') {
+        document.getElementById('statScheduled').innerText = `${tasks.length * 4} Tasks`;
+        document.getElementById('statPoints').innerText = `+340 pts`;
+      } else {
+        document.getElementById('statScheduled').innerText = `${tasks.length * 40} Tasks`;
+        document.getElementById('statPoints').innerText = `+3,600 pts`;
+      }
+    }
+
+    function askAIPrompt(prompt) {
+      document.getElementById('aiInput').value = prompt;
+      sendAIMessage();
+    }
+
+    function sendAIMessage() {
+      const input = document.getElementById('aiInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const stream = document.getElementById('aiChatStream');
+      stream.innerHTML += `
+        <div class="bg-[#6366F1] p-3 rounded-2xl text-white ml-auto max-w-[85%] space-y-1">
+          <p>${escapeHtml(text)}</p>
+        </div>
+      `;
+      input.value = '';
+      stream.scrollTop = stream.scrollHeight;
+
+      setTimeout(() => {
+        if (text.toLowerCase().includes('plan') || text.toLowerCase().includes('exam')) {
+          stream.innerHTML += `
+            <div class="bg-[#131B2E] border border-amber-500/40 p-3 rounded-2xl text-[#CBD5E1] space-y-2 max-w-[85%]">
+              <span class="font-bold text-amber-400 block text-[10px]"><i class="fas fa-wand-magic-sparkles mr-1"></i> AI Structured Plan Generated</span>
+              <p>I crafted a 4-week exam sprint with 4 milestones and distributed revision drills.</p>
+              <div class="p-2 bg-[#0B0F19] rounded-lg border border-[#1E293B] text-[11px] space-y-1">
+                <div>• W1: Reaction Mechanisms (Nov 2)</div>
+                <div>• W2: Synthesis Problem Drill (Nov 9)</div>
+                <div>• W3: Full Mock Exam 1 (Nov 16)</div>
+              </div>
+              <button onclick="applyTemplateBlueprint('Organic Chemistry Exam Sprint', 4);closeModal('aiModal')" class="w-full py-1.5 bg-[#10B981] hover:bg-emerald-600 text-[#0B0F19] font-bold rounded-lg text-[10px]">
+                Approve & Create Track
+              </button>
+            </div>
+          `;
+        } else {
+          const completedCount = tasks.filter(t => t.status === 'completed').length;
+          stream.innerHTML += `
+            <div class="bg-[#131B2E] border border-[#26334D] p-3 rounded-2xl text-[#CBD5E1] space-y-1 max-w-[85%]">
+              <span class="font-bold text-[#06B6D4] block text-[10px]">TELOS AI</span>
+              <p>Based on your live schedule, you have ${tasks.length} tasks scheduled (${completedCount} completed). You have earned ${points} accumulated points!</p>
+            </div>
+          `;
+        }
+        stream.scrollTop = stream.scrollHeight;
+      }, 500);
+    }
+
+    function openChatView(name, isGroup) {
+      alert(`Chat with "${name}" (Real-time Socket.IO connected). Sending updates...`);
+    }
+
+    function liveSearch(q) {
+      const results = document.getElementById('searchResults');
+      if (!q.trim()) {
+        results.innerHTML = `
+          <span class="text-[10px] text-[#94A3B8] uppercase font-bold block">Quick Commands</span>
+          <div onclick="navigateTab('add');closeModal('searchModal')" class="p-2.5 bg-[#131B2E] rounded-xl flex items-center space-x-2 cursor-pointer hover:bg-[#1E293B]">
+            <i class="fas fa-plus text-[#818CF8]"></i>
+            <span class="text-white font-medium">Create a new Task or Track</span>
+          </div>
+        `;
+        return;
+      }
+
+      const matchingTasks = tasks.filter(t => t.title.toLowerCase().includes(q.toLowerCase()));
+      const matchingTracks = tracks.filter(tr => tr.title.toLowerCase().includes(q.toLowerCase()));
+
+      let html = `<span class="text-[10px] text-[#94A3B8] uppercase font-bold block">Results for "${escapeHtml(q)}"</span>`;
+      matchingTasks.forEach(t => {
+        html += `
+          <div onclick="openTaskDetails('${t.id}');closeModal('searchModal')" class="p-2.5 bg-[#131B2E] rounded-xl flex items-center space-x-2 cursor-pointer hover:bg-[#1E293B]">
+            <i class="fas fa-check-circle text-emerald-400"></i>
+            <span class="text-white font-medium">${escapeHtml(t.title)}</span>
+          </div>
+        `;
+      });
+      matchingTracks.forEach(tr => {
+        html += `
+          <div onclick="navigateTab('track');closeModal('searchModal')" class="p-2.5 bg-[#131B2E] rounded-xl flex items-center space-x-2 cursor-pointer hover:bg-[#1E293B]">
+            <i class="fas fa-route text-indigo-400"></i>
+            <span class="text-white font-medium">${escapeHtml(tr.title)}</span>
+          </div>
+        `;
+      });
+
+      if (matchingTasks.length === 0 && matchingTracks.length === 0) {
+        html += `<p class="text-xs text-[#94A3B8] py-2">No direct matches. Ask the AI Assistant!</p>`;
+      }
+      results.innerHTML = html;
+    }
+
+    function testBackendConnection() {
+      const url = document.getElementById('customApiUrl').value.trim();
+      const statusNotice = document.getElementById('backendStatusNotice');
+      if (!url) {
+        statusNotice.innerText = 'Please specify a backend endpoint (e.g. http://localhost:5000)';
+        statusNotice.className = 'text-[10px] text-rose-400 block';
+        return;
+      }
+      statusNotice.innerText = 'Testing connection...';
+      statusNotice.className = 'text-[10px] text-amber-400 block';
+
+      fetch(`${url}/api/v1/auth/me`)
+        .then(() => {
+          localStorage.setItem('telos_api_base', url);
+          statusNotice.innerText = 'Connected successfully to backend API!';
+          statusNotice.className = 'text-[10px] text-emerald-400 block';
+        })
+        .catch(() => {
+          localStorage.setItem('telos_api_base', url);
+          statusNotice.innerText = `API endpoint saved (${url}). Local storage fallback active.`;
+          statusNotice.className = 'text-[10px] text-emerald-400 block';
+        });
+    }
+
+    function formatTime(t) {
+      const parts = t.split(':');
+      let h = parseInt(parts[0]);
+      const m = parts[1];
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12;
+      h = h ? h : 12;
+      return `${h}:${m} ${ampm}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      })[m]);
+    }
+  </script>
+</body>
+</html>
